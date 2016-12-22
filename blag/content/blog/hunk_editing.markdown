@@ -228,8 +228,7 @@ following:
     # an opportunity to edit again. If all lines of the hunk are removed,
     # then the edit is aborted and the hunk is left unchanged.
 
-From here, we want to replace the leading minus of the change removal to a
-space and remove the last three additions.
+From here, we want to edit the diff to represent only what we care about.
 
 That is, we want the diff to look like:
 
@@ -238,8 +237,8 @@ That is, we want the diff to look like:
 
        defp _sort([]), do: []
     -  defp _sort(list = [h|t]) do
-     sort(Enum.filter(list, &(&1 < h))) ++ [h] ++ _sort(Enum.filter(list, &(&1 > h)))
     +  defp _sort(list = [h|_]) do
+     sort(Enum.filter(list, &(&1 < h))) ++ [h] ++ _sort(Enum.filter(list, &(&1 > h)))
        end
 
      end
@@ -257,8 +256,8 @@ can check the staged changes via `git-diff`:
 
        defp _sort([]), do: []
     -  defp _sort(list = [h|t]) do
-         _sort(Enum.filter(list, &(&1 < h))) ++ [h] ++ _sort(Enum.filter(list, &(&1 > h)))
     +  defp _sort(list = [h|_]) do
+         _sort(Enum.filter(list, &(&1 < h))) ++ [h] ++ _sort(Enum.filter(list, &(&1 > h)))
        end
 
      end
