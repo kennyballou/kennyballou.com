@@ -6,6 +6,3 @@ build: container blog
 
 container:
 	@docker build -t ${TAG} .
-
-blog:
-	@$(MAKE) -C blag
