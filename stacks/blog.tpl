@@ -105,6 +105,7 @@
                             {"Ref": "BlogBucketName"}]]},
                         "ViewerProtocolPolicy": "redirect-to-https",
                         "MinTTL": 0,
+                        "DefaultTTL": 3600,
                         "AllowedMethods": ["HEAD", "GET"],
                         "CachedMethods": ["HEAD", "GET"],
                         "ForwardedValues": {
