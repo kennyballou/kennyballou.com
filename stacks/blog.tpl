@@ -226,7 +226,8 @@
         "URIRewriteLambdaVersion": {
             "Type": "AWS::Lambda::Version",
             "Properties": {
-                "FunctionName": {"Ref": "URIRewriteLambdaFunction"},
+                "FunctionName": {"Fn::GetAtt": [
+                    "URIRewriteLambdaFunction", "Arn"]},
                 "Description": "Lambda Function performing URI rewriting"
             }
         }
