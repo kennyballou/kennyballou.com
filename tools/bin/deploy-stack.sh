@@ -5,30 +5,30 @@ set -ex
 STACK_NAME=blog-kennyballou
 REGION=us-east-1
 
-function deploy() {
+deploy() {
     aws cloudformation \
         --region ${REGION} \
         create-stack \
         --stack-name ${STACK_NAME} \
         --capabilities CAPABILITY_NAMED_IAM \
-        --template-body file://$(pwd)/_build/${REGION}/stacks/blog.template
+        --template-body "file://$(pwd)/_build/${REGION}/stacks/blog.template"
 }
 
-function undeploy() {
+undeploy() {
     aws cloudformation \
         --region ${REGION} \
         delete-stack \
         --stack-name ${STACK_NAME}
 }
 
-function changeset() {
+changeset() {
     aws cloudformation \
         --region ${REGION} \
         create-change-set \
         --stack-name ${STACK_NAME} \
-        --change-set-name ${STACK_NAME}-$(uuidgen) \
+        --change-set-name "${STACK_NAME}-$(uuidgen)" \
         --capabilities CAPABILITY_NAMED_IAM \
-        --template-body file://$(pwd)/_build/${REGION}/stacks/blog.template
+        --template-body "file://$(pwd)/_build/${REGION}/stacks/blog.template"
 }
 
 case $1 in
