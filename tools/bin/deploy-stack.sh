@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-set -ex
+set -e
 
 STACK_NAME=blog-kennyballou
 REGION=us-east-1
