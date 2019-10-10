@@ -41,4 +41,8 @@ case $1 in
     undeploy)
         undeploy
         ;;
+    *)
+        echo "Available commands are DEPLOY | CHANGESET | UNDEPLOY";
+        exit 1;
+        ;;
 esac
