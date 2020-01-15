@@ -176,7 +176,7 @@
                 "Handler": "index.handler",
                 "MemorySize": 128,
                 "Role": {"Fn::GetAtt": ["URIRewriteLambdaRole", "Arn"]},
-                "Runtime": "nodejs8.10",
+                "Runtime": "python3.7",
                 "Tags": [
                     {"Key": "Domain", "Value": {"Ref": "DomainName"}}
                 ]
