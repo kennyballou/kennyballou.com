@@ -1,0 +1,49 @@
+[+ autogen5 template -*- mode: json -*- +]
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                {"Fn::Join": [":", [
+                    "arn:aws:logs",
+                    {"Ref": "AWS::Region"},
+                    {"Ref": "AWS::AccountId"},
+                    "log-group:/aws/codebuild/CodeBuild*"]]},
+                {"Fn::Join": [":", [
+                    "arn:aws:logs",
+                    {"Ref": "AWS::Region"},
+                    {"Ref": "AWS::AccountId"},
+                    "log-group:/aws/codebuild/CodeBuild*",
+                    "log-stream:*"]]}
+            ]
+        }, {
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:GitPull"
+            ],
+            "Resource": [
+                {"Fn::Join": [":", [
+                    "arn:aws:codecommit",
+                    {"Ref": "AWS::Region"},
+                    {"Ref": "AWS::AccountId"},
+                    "*"]]}
+            ]
+        }, {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:Get*",
+                "s3:List"
+            ],
+            "Resource": [
+                {"Fn::GetAtt": ["BlogContentBucket", "Arn"]},
+                {"Fn::Join": ["", [{"Fn::GetAtt": ["BlogContentBucket", "Arn"]}, "/*"]]}
+            ]
+        }
+    ]
+}

@@ -14,9 +14,11 @@ else
 endif
 
 SOURCE_TEMPLATES:=$(wildcard stacks/*.tpl)
+IN_SOURCES:= stacks/codecommit-build.py
 SOURCE_PARAMS:=$(wildcard params/*.tpl)
 TEMPLATES:=$(patsubst %.tpl, $(BUILD_DIR)/%.template, $(SOURCE_TEMPLATES))
 STACK_PARAMS:=$(patsubst %.tpl, $(BUILD_DIR)/%.params, $(SOURCE_PARAMS))
+IN_OUTPUTS:=$(patsubst %,%.in, $(IN_SOURCES))
 
 SOURCES:=$(shell find stacks/ -type f -name '*.in')
 
@@ -28,7 +30,7 @@ all: autogen/stack.def \
 autogen/stack.def: autogen/stack.def.in
 	cat $^ > $@
 
-$(BUILD_DIR)/%.json: %.tpl $(SOURCES)
+$(BUILD_DIR)/%.json: %.tpl $(SOURCES) $(IN_OUTPUTS)
 	mkdir -p $(dir $@)
 	$(AG) --override-tpl=$< --definitions=autogen/stack.def > $@
 
@@ -37,6 +39,12 @@ $(BUILD_DIR)/%.template: $(BUILD_DIR)/%.json
 
 $(BUILD_DIR)/%.params: $(BUILD_DIR)/%.json
 	$(JQ) '.' $< > $@
+
+%.in: %
+	echo "[+ autogen5 template +]" > $@
+	echo '{"Fn::Join": ["\n", [' >> $@
+	$(SHELL) scm/ppag.scm $^ >> $@
+	echo ']]}' >> $@
 
 .PHONY: clean
 clean:

@@ -230,6 +230,156 @@
                     "URIRewriteLambdaFunction", "Arn"]},
                 "Description": "Lambda Function performing URI rewriting"
             }
+        },
+        "BlogContentRepository": {
+            "Type": "AWS::CodeCommit::Repository",
+            "Properties": {
+                "RepositoryDescription": "Blog Content Repository",
+                "RepositoryName": {"Ref": "BlogBucketName"},
+                "Triggers": [
+                    {
+                        "Name": "Build and Deploy",
+                        "Branches": ["master"],
+                        "DestinationArn": {"Ref": "CodeCommitEventsSnsTopic"},
+                        "Events": ["all"]
+                    }
+                ]
+            }
+        },
+        "BlogCodeBuildLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": {"Fn::Join": ["-", [
+                    "/aws/codebuild/CodeBuild",
+                    {"Ref": "BlogBucketName"}]]},
+                "RetentionInDays": 14
+            }
+        },
+        "BlogCodeBuild": {
+            "Type": "AWS::CodeBuild::Project",
+            "Properties": {
+                "Name": "BlogCI",
+                "Description": "Blog Build Project",
+                "Artifacts": {
+                    "Type": "NO_ARTIFACTS"
+                },
+                "Environment": {
+                    "ComputeType": "BUILD_GENERAL1_SMALL",
+                    "Image": "kennyballou/debian-pandoc:latest",
+                    "Type": "LINUX_CONTAINER"
+                },
+                "LogsConfig": {
+                    "CloudWatchLogs": {
+                        "GroupName": {"Fn::Join": ["-", [
+                            "/aws/codebuild/CodeBuild",
+                            {"Ref": "BlogBucketName"}
+                        ]]},
+                        "Status": "ENABLED"
+                    }
+                },
+                "ServiceRole": {"Ref": "CodeBuildIamServiceRole"},
+                "Source": {
+                    "Type": "CODECOMMIT",
+                    "Location": {"Fn::GetAtt": ["BlogContentRepository",
+                                                "CloneUrlHttp"]}
+                }
+            }
+        },
+        "CodeCommitEventsSnsTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "DisplayName": "CodeCommit Events",
+                "TopicName": "codecommit-events"
+            }
+        },
+        "CodeBuildIamManagedPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "Description": "CodeBuild Service Policy",
+                "PolicyDocument": [+ INCLUDE "codebuild-service-role.json.in" +]
+            }
+        },
+        "CodeBuildIamServiceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Principal": {
+                                "Service": "codebuild.amazonaws.com"
+                            },
+                            "Effect": "Allow"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    {"Ref": "CodeBuildIamManagedPolicy"}
+                ]
+            }
+        },
+        "LambdaCodeCommitBuildIamManagedPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "Description": "Lambda CodeCommit-Build Execution Policy",
+                "PolicyDocument": [+ INCLUDE "codecommit-build-policy.json.in" +]
+            }
+        },
+        "LambdaCodeCommitBuildIamServiceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            },
+                            "Effect": "Allow"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    {"Ref": "LambdaCodeCommitBuildIamManagedPolicy"}
+                ]
+            }
+        },
+        "CodeCommitBuildLambdaPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {"Fn::GetAtt": [
+                    "CodeCommitBuildLambdaFunction", "Arn"]},
+                "Action": "lambda:InvokeFunction",
+                "Principal": "sns.amazonaws.com",
+                "SourceArn": {"Ref": "CodeCommitEventsSnsTopic"}
+            }
+        },
+        "CodeCommitBuildLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "codecommit-build-bae089e8-3871-4067-9a3d-bac114f08438",
+                "Code": {
+                    "ZipFile": [+ INCLUDE "codecommit-build.py.in" +]
+                },
+                "Description": "Start builds on commit events",
+                "Handler": "index.handler",
+                "MemorySize": 128,
+                "Timeout": 3,
+                "Role": {"Fn::GetAtt": [
+                    "LambdaCodeCommitBuildIamServiceRole", "Arn"]},
+                "Runtime": "python3.7"
+            }
+        },
+        "CodeCommitBuildSnsSubscription": {
+            "Type": "AWS::SNS::Subscription",
+            "Properties": {
+                "Protocol": "lambda",
+                "Endpoint": {"Fn::GetAtt": [
+                    "CodeCommitBuildLambdaFunction", "Arn"]},
+                "TopicArn": {"Ref": "CodeCommitEventsSnsTopic"}
+            }
         }
     }
 }
