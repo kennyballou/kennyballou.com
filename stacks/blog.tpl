@@ -166,6 +166,13 @@
                 "Type": "A"
             }
         },
+        "URIRewriteLambdaLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/us-east-1.blog-kennyballou-URIRewriteLambdaFunction-5MXFF1KIA87D",
+                "RetentionInDays": 90
+            }
+        },
         "URIRewriteLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
@@ -209,12 +216,14 @@
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-                                        "logs:CreateLogGroup",
                                         "logs:CreateLogStream",
                                         "logs:PutLogEvents"
                                     ],
                                     "Resource": [
-                                        "arn:aws:logs:*:*:*"
+                                        {"Fn::GetAtt": ["URIRewriteLambdaLogGroup", "Arn"]},
+                                        {"Fn::Join": ["", [
+                                            {"Fn::GetAtt": ["URIRewriteLambdaLogGroup", "Arn"]},
+                                            "/*"]]}
                                     ]
                                 }
                             ]
