@@ -166,6 +166,18 @@
                 "Type": "A"
             }
         },
+        "BlogAliasAAAARecord": {
+            "Type": "AWS::Route53::RecordSet",
+            "Properties": {
+                "AliasTarget": {
+                    "DNSName": {"Fn::GetAtt": ["CFDistribution", "DomainName"]},
+                    "HostedZoneId": {"Ref": "CloudFrontHostedZone"}
+                },
+                "HostedZoneId": {"Ref": "HostedZone"},
+                "Name": {"Ref": "DomainName"},
+                "Type": "AAAA"
+            }
+        },
         "URIRewriteLambdaLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
