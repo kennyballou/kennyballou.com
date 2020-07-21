@@ -148,7 +148,7 @@
                     },
                     "ViewerCertificate": {
                         "SslSupportMethod": "sni-only",
-                        "MinimumProtocolVersion": "TLSv1.2_2018",
+                        "MinimumProtocolVersion": "TLSv1.2_2019",
                         "AcmCertificateArn": {"Ref": "SSLCertificate"}
                     }
                 }
