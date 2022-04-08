@@ -286,7 +286,7 @@
                 },
                 "Environment": {
                     "ComputeType": "BUILD_GENERAL1_SMALL",
-                    "Image": "kennyballou/debian-pandoc:latest",
+                    "Image": "aws/codebuild/standard:5.0",
                     "Type": "LINUX_CONTAINER"
                 },
                 "LogsConfig": {
